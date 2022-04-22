@@ -8,6 +8,13 @@ on:
 
 jobs:
 
+  test:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Test
+        run: go test -v ./...
+
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -21,5 +28,3 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
