@@ -90,15 +90,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18
-          
+          go-version: 1.18          
+
+      - name: Build with for ${{ matrix.TARGET }}
+        run: ${{ matrix.CMD_BUILD }}
+        
       - name: Search
         run: |
           ${{ matrix.CMD }} 
           ${{ matrix.CMD }} ./dist
-
-      - name: Build with for ${{ matrix.TARGET }}
-        run: ${{ matrix.CMD_BUILD }}
 
       - uses: actions/upload-artifact@v3
         with:
