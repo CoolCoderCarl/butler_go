@@ -21,6 +21,18 @@ jobs:
     - name: Test
       run: go test -v ./...
 
+    - name: Step To run on failure
+      if: ${{ failure() }}
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        format: html
+        message: |
+          <b>!!! FAILED !!!</b>
+          <b>Failed job:</b> https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}      
+
   release:
     name: Create Release
     runs-on: ubuntu-latest
@@ -94,10 +106,6 @@ jobs:
 
       - name: Build with for ${{ matrix.TARGET }}
         run: ${{ matrix.CMD_BUILD }}
-        
-      - name: Search
-        run: |
-          ${{ matrix.CMD }} 
 
       - uses: actions/upload-artifact@v3
         with:
@@ -112,7 +120,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.release.outputs.get_release_url }}
-          asset_path: ./dist/${{ matrix.OUT_FILE_NAME }}
+          asset_path: ${{ matrix.OUT_FILE_NAME }}
           asset_name: ${{ matrix.OUT_FILE_NAME }}
           asset_content_type: ${{ matrix.ASSET_MIME }}
 
