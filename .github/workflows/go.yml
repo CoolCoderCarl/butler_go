@@ -98,12 +98,11 @@ jobs:
       - name: Search
         run: |
           ${{ matrix.CMD }} 
-          ${{ matrix.CMD }} ./dist
 
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.OUT_FILE_NAME }}
-          path: ./dist/${{ matrix.OUT_FILE_NAME }}
+          path: ${{ matrix.OUT_FILE_NAME }}
           retention-days: 1
 
       - name: Upload Release Asset
