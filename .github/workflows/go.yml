@@ -89,13 +89,11 @@ jobs:
             CMD_BUILD: go build -o cli.exe cli.go
             OUT_FILE_NAME: cli.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
-            CMD: dir
           - os: ubuntu-latest
             TARGET: ubuntu
             CMD_BUILD: go build -o cli cli.go
             OUT_FILE_NAME: cli
             ASSET_MIME: application/x-binary
-            CMD: ls -arl
 
     steps:
       - uses: actions/checkout@v2
