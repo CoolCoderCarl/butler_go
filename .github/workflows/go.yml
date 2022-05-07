@@ -94,8 +94,8 @@ jobs:
           
       - name: Search
         run: |
-          ${{ CMD }} 
-          ${{ CMD }} ./dist
+          ${{ matrix.CMD }} 
+          ${{ matrix.CMD }} ./dist
 
       - name: Build with for ${{ matrix.TARGET }}
         run: ${{ matrix.CMD_BUILD }}
