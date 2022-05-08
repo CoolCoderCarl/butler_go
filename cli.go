@@ -22,6 +22,6 @@ func wordcounter(r io.Reader) int {
 }
 
 func main() {
-	fmt.Print("Input words, then CTRL+C:")
+	fmt.Println("Input words, then CTRL+C:")
 	fmt.Println("Total words:", wordcounter(os.Stdin))
 }
