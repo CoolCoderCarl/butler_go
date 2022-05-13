@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,7 +25,8 @@ func clean_the_dir(directory_path string) {
 }
 
 func main() {
-	directory_path := flag.String("/tmp/", ".", "Remove files in target directory. By default remove all files in current directory")
-
+	directory_path := flag.String("clean", ".", "Remove files in target directory")
+	flag.Parse()
+	fmt.Print(*directory_path)
 	clean_the_dir(*directory_path)
 }
