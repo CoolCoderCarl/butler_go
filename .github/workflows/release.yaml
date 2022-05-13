@@ -83,12 +83,18 @@ jobs:
           name: ${{ matrix.OUT_FILE_NAME }}
           path: ${{ matrix.OUT_FILE_NAME }}
           retention-days: 1
+          
+      - name: Search env
+        run: |
+          env
+          printenv
+          echo $GITHUB_TOKEN
 
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        
         with:
           upload_url: ${{ needs.release.outputs.get_release_url }}
           asset_path: ${{ matrix.OUT_FILE_NAME }}
