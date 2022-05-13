@@ -1,28 +1,82 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
-	"io"
+	"io/ioutil"
+	"log"
 	"os"
+	"path"
+	"strings"
 )
 
-func wordcounter(r io.Reader) int {
-	scanner := bufio.NewScanner(r)
+func fatal_err(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
-	scanner.Split(bufio.ScanWords)
+var target_dir_name string = "ALL"
 
-	wc := 0
+func clean_the_dir(args_cln_name string) {
 
-	for scanner.Scan() {
-		wc++
+	dir, err := ioutil.ReadDir(args_cln_name)
+	fatal_err(err)
+	for _, d := range dir {
+		os.RemoveAll(path.Join([]string{args_cln_name, d.Name()}...))
+	}
+}
+
+func group_up_files(args_dir_name string) {
+
+	files_extension := []string{
+		".txt",
+		".doc",
+		".docx",
+		".pdf",
+		".xlsx",
+		".bmp",
+		".jpg",
+		".rtf",
+		".pptx",
+		".conf",
+		".cfg",
+		".net",
+		".deny",
+		".allow",
 	}
 
-	return wc
+	files, err := ioutil.ReadDir(args_dir_name)
+	fatal_err(err)
+
+	for _, file := range files {
+		for _, ext := range files_extension {
+			if strings.HasSuffix(file.Name(), ext) {
+				new_dir_path := args_dir_name + target_dir_name + strings.ToUpper(ext)
+				if _, err := os.Stat(new_dir_path); os.IsNotExist(err) {
+					err := os.Mkdir(new_dir_path, 0644)
+					fatal_err(err)
+				}
+				err := os.Rename(args_dir_name+file.Name(), new_dir_path+"/"+file.Name())
+				fatal_err(err)
+			}
+		}
+	}
 }
 
 func main() {
-	fmt.Println("Input words, then CTRL+C:")
-	fmt.Println("Total words:", wordcounter(os.Stdin))
-	fmt.Println("Success")
+	args_cln_name := flag.String("clean", ".", "Clean target directory")
+	args_dir_name := flag.String("dir", ".", "Dir to group up the files")
+	flag.Parse()
+
+	switch os.Args[1] {
+	case "--clean":
+		fmt.Print(*args_cln_name)
+		clean_the_dir(*args_cln_name)
+	case "--dir":
+		fmt.Println(*args_dir_name)
+		group_up_files(*args_dir_name)
+	default:
+		os.Exit(1)
+	}
 }
