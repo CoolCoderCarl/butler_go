@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,6 +15,7 @@ func fatal_err(err error) {
 }
 
 func clean_the_dir(directory_path string) {
+
 	dir, err := ioutil.ReadDir(directory_path)
 	fatal_err(err)
 	for _, d := range dir {
@@ -22,5 +24,7 @@ func clean_the_dir(directory_path string) {
 }
 
 func main() {
-	clean_the_dir("/test/test/")
+	directory_path := flag.String("/tmp/", ".", "Remove files in target directory. By default remove all files in current directory")
+
+	clean_the_dir(*directory_path)
 }
