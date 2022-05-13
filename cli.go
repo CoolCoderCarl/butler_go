@@ -1,27 +1,26 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"io"
+	"io/ioutil"
+	"log"
 	"os"
+	"path"
 )
 
-func wordcounter(r io.Reader) int {
-	scanner := bufio.NewScanner(r)
-
-	scanner.Split(bufio.ScanWords)
-
-	wc := 0
-
-	for scanner.Scan() {
-		wc++
+func fatal_err(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
+}
 
-	return wc
+func clean_the_dir(directory_path string) {
+	dir, err := ioutil.ReadDir(directory_path)
+	fatal_err(err)
+	for _, d := range dir {
+		os.RemoveAll(path.Join([]string{directory_path, d.Name()}...))
+	}
 }
 
 func main() {
-	fmt.Print("Input words, then CTRL+C:")
-	fmt.Println("Total words:", wordcounter(os.Stdin))
+	clean_the_dir("/test/test/")
 }
