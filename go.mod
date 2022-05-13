@@ -1,3 +1,3 @@
-module example.cli
+module butler.cli
 
 go 1.16

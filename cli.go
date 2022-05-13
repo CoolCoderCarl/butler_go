@@ -1,28 +1,47 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
-	"io"
+	"io/ioutil"
+	"log"
 	"os"
+	"path"
 )
 
-func wordcounter(r io.Reader) int {
-	scanner := bufio.NewScanner(r)
-
-	scanner.Split(bufio.ScanWords)
-
-	wc := 0
-
-	for scanner.Scan() {
-		wc++
+func fatal_err(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
+}
 
-	return wc
+func clean_the_dir(directory_path string) {
+
+	dir, err := ioutil.ReadDir(directory_path)
+	fatal_err(err)
+	for _, d := range dir {
+		os.RemoveAll(path.Join([]string{directory_path, d.Name()}...))
+	}
+}
+
+func group_up_files(new_dir_name string) {
+
+	print("New dir name " + new_dir_name)
 }
 
 func main() {
-	fmt.Println("Input words, then CTRL+C:")
-	fmt.Println("Total words:", wordcounter(os.Stdin))
-	fmt.Println("Success")
+	directory_path := flag.String("clean", ".", "Clean target directory")
+	target_dir_name := flag.String("dir", ".", "Dir to group up the files")
+	flag.Parse()
+
+	switch os.Args[1] {
+	case "--clean":
+		fmt.Print(*directory_path)
+		clean_the_dir(*directory_path)
+	case "--dir":
+		fmt.Println(*target_dir_name)
+		group_up_files(*target_dir_name)
+	default:
+		os.Exit(1)
+	}
 }
