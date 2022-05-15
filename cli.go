@@ -53,6 +53,7 @@ func group_up_files(args_dir_name string) {
 		for _, ext := range files_extension {
 			if strings.HasSuffix(file.Name(), ext) {
 				new_dir_path := args_dir_name + target_dir_name + strings.ToUpper(ext)
+				// Skip if cli.* has been met
 				if _, err := os.Stat(new_dir_path); os.IsNotExist(err) {
 					err := os.Mkdir(new_dir_path, 0644)
 					fatal_err(err)
@@ -78,5 +79,6 @@ func main() {
 		group_up_files(*args_dir_name)
 	default:
 		os.Exit(1)
+		// Add msg about err
 	}
 }
