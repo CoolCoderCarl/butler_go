@@ -59,12 +59,12 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: go build -o butler_go.exe butler_go.go
-            OUT_FILE_NAME: cli.exe
+            OUT_FILE_NAME: butler_go.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
           - os: ubuntu-latest
             TARGET: ubuntu
             CMD_BUILD: go build -o butler_go butler_go.go
-            OUT_FILE_NAME: cli
+            OUT_FILE_NAME: butler_go
             ASSET_MIME: application/x-binary
 
     steps:
