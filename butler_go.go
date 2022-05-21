@@ -71,8 +71,8 @@ func groupUpFiles(argGroupUpFiles string) {
 		os.Exit(1)
 	} else {
 		for _, file := range files {
-			if strings.Contains(file.Name(), os.Args[0]) {
-				return
+			if strings.Contains(os.Args[0], file.Name()) {
+				continue
 			} else {
 				for _, ext := range extensions {
 					if strings.HasSuffix(file.Name(), ext) {
