@@ -7,12 +7,16 @@ import (
 	"path"
 )
 
-func cleanDir(argPathToClean string) {
-
-	pathDir, err := os.ReadDir(argPathToClean)
+func check(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func cleanDir(argPathToClean string) {
+
+	pathDir, err := os.ReadDir(argPathToClean)
+	check(err)
 
 	for _, fileName := range pathDir {
 		os.RemoveAll(path.Join([]string{(argPathToClean), fileName.Name()}...))
