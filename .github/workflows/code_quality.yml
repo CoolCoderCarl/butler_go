@@ -2,32 +2,33 @@ name: Code Quality
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ feature/* ]
 
 jobs:
 
   code_quality:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.16
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.16
 
-    - name: Test
-      run: go test -v ./...
+      - name: Test
+        run: go test -v ./...
 
-    - name: Step To run on failure
-      if: ${{ failure() }}
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_CHAT }}
-        token: ${{ secrets.TELEGRAM_TOKEN }}
-        format: html
-        message: |
-          <b>!!! FAILED !!!</b>
-          <b>Failed job:</b> https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}      
+      - name: Step To run on failure
+        if: ${{ failure() }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: html
+          message: |
+            <b>!!! FAILED !!!</b>
+            <b>Failed job:</b> https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}      
 
