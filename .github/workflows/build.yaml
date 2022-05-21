@@ -2,7 +2,7 @@ name: Build
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ develop ]
 
 jobs:
        
@@ -16,7 +16,7 @@ jobs:
         include:
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: go build -o butler_go.exe butler_go.go
+            CMD_BUILD: go build -o butler_go.exe -ldflags "-s -w" butler_go.go
             OUT_FILE_NAME: butler_go.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
           - os: ubuntu-latest
@@ -26,7 +26,10 @@ jobs:
             ASSET_MIME: application/x-binary
 
     steps:
-      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
