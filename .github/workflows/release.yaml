@@ -153,7 +153,7 @@ jobs:
   telegram:
     runs-on: ubuntu-latest
     name: Notification
-    needs: [ prepare release, build ]
+    needs: [ prepare, release, build ]
 
     steps:
       - name: Notify telegram message after Released
