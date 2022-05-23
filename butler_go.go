@@ -4,11 +4,11 @@ import (
 	"archive/zip"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 func check(err error) {
@@ -16,6 +16,10 @@ func check(err error) {
 		log.Fatal(err)
 	}
 }
+
+const (
+	DDMMYYYYhhmmss = "2006.01.02_15.04.05"
+)
 
 func cleanTheDir(argPathToClean string) {
 
@@ -92,33 +96,30 @@ func groupUpFiles(argGroupUpFiles string) {
 	}
 }
 
-func createArchive() {
+func createArchive(argCreateArchive string) {
+	now := time.Now().UTC()
+	timestamp := now.Format(DDMMYYYYhhmmss)
 
-	files, err := os.ReadDir("/test/test/")
+	files, err := os.ReadDir(argCreateArchive)
 	check(err)
 
+	archive, err := os.Create(timestamp + ".zip")
+	check(err)
+	defer archive.Close()
+	zipWriter := zip.NewWriter(archive)
+
 	for _, file := range files {
-		fmt.Println(file.Name())
-		archive, err := os.Create("archive.zip")
+		_, err := zipWriter.Create(file.Name())
 		check(err)
-		defer archive.Close()
-		zipWriter := zip.NewWriter(archive)
-		file, err := os.Open(file.Name())
-		check(err)
-		defer file.Close()
-		w_file, err := zipWriter.Create(file.Name())
-		check(err)
-		if _, err := io.Copy(w_file, file); err != nil {
-			panic(err)
-		}
-		zipWriter.Close()
 	}
+	err = zipWriter.Close()
+	check(err)
 }
 
 func main() {
 	argPathToClean := flag.String("clean", ".", "Remove all files from target directory")
 	argGroupUpFiles := flag.String("group", ".", "Group up all files in target directory")
-	// argCreateArchive := flag.String("archive", ".", "Create archive from target directory")
+	argCreateArchive := flag.String("archive", ".", "Create archive from target directory")
 	flag.Parse()
 
 	switch os.Args[1] {
@@ -128,9 +129,8 @@ func main() {
 	case "--group":
 		fmt.Println(*argGroupUpFiles)
 		groupUpFiles(*argGroupUpFiles)
-		// case "--archive":
-		// 	fmt.Println(*argCreateArchive)
-		// 	createArchive(*argCreateArchive)
+	case "--archive":
+		fmt.Println(*argCreateArchive)
+		createArchive(*argCreateArchive)
 	}
-	// createArchive()
 }
