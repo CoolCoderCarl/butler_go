@@ -78,8 +78,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.REPOS_TOKEN }}
         with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+          tag_name: ${{ needs.prepare.outputs.get_current_tag }}
+          release_name: Release ${{ needs.prepare.outputs.get_current_tag }}
+          body: ${{ steps.github_release.outputs.changelog }}
 
       - name: Set Release URL
         id: set_release_url
@@ -157,6 +158,7 @@ jobs:
             <b>!!! FAILED !!!</b>
             <b>Failed job:</b> https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
             See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+
 
   telegram:
     runs-on: ubuntu-latest
