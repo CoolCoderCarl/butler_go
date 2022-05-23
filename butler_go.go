@@ -1,8 +1,10 @@
 package main
 
 import (
+	"archive/zip"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -15,7 +17,7 @@ func check(err error) {
 	}
 }
 
-func cleanDir(argPathToClean string) {
+func cleanTheDir(argPathToClean string) {
 
 	pathDir, err := os.ReadDir(argPathToClean)
 	check(err)
@@ -90,17 +92,45 @@ func groupUpFiles(argGroupUpFiles string) {
 	}
 }
 
+func createArchive() {
+
+	files, err := os.ReadDir("/test/test/")
+	check(err)
+
+	for _, file := range files {
+		fmt.Println(file.Name())
+		archive, err := os.Create("archive.zip")
+		check(err)
+		defer archive.Close()
+		zipWriter := zip.NewWriter(archive)
+		file, err := os.Open(file.Name())
+		check(err)
+		defer file.Close()
+		w_file, err := zipWriter.Create(file.Name())
+		check(err)
+		if _, err := io.Copy(w_file, file); err != nil {
+			panic(err)
+		}
+		zipWriter.Close()
+	}
+}
+
 func main() {
 	argPathToClean := flag.String("clean", ".", "Remove all files from target directory")
 	argGroupUpFiles := flag.String("group", ".", "Group up all files in target directory")
+	// argCreateArchive := flag.String("archive", ".", "Create archive from target directory")
 	flag.Parse()
 
 	switch os.Args[1] {
 	case "--clean":
 		fmt.Println(*argPathToClean)
-		cleanDir(*argPathToClean)
+		cleanTheDir(*argPathToClean)
 	case "--group":
 		fmt.Println(*argGroupUpFiles)
 		groupUpFiles(*argGroupUpFiles)
+		// case "--archive":
+		// 	fmt.Println(*argCreateArchive)
+		// 	createArchive(*argCreateArchive)
 	}
+	// createArchive()
 }
