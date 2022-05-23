@@ -3,14 +3,17 @@ name: Release
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - 'changelog.json'    
 
 jobs:    
 
-  release:
-    name: Create Release
+  prepare:
+    name: Prepare env & label
     runs-on: ubuntu-latest
     outputs:
-      get_release_url: ${{ steps.set_release_url.outputs.release_url }}
       get_current_tag: ${{ steps.set_current_tag_id.outputs.current_tag }}
     steps:
 
@@ -22,6 +25,52 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.0
         with:
           github_token: ${{ secrets.REPOS_TOKEN }}
+
+      - name: Set label develop
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: develop
+
+      - name: Add author as assignees
+        uses: actions-ecosystem/action-add-assignees@v1
+        with:
+          assignees: ${{ github.actor }}
+          github_token: ${{ secrets.REPOS_TOKEN }}
+
+      - name: Set tag version to output
+        id: set_current_tag_id
+        run: echo "::set-output name=current_tag::${{ steps.tag_version.outputs.new_tag }}"
+
+      - name: Notify if failure
+        if: ${{ failure() }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: html
+          message: |
+            <b>!!! FAILED !!!</b>
+            <b>Failed job:</b> https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: prepare
+    outputs:
+      get_release_url: ${{ steps.set_release_url.outputs.release_url }}
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v3
+        with:
+          configuration: "changelog.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
@@ -36,11 +85,7 @@ jobs:
         id: set_release_url
         run: echo "::set-output name=release_url::${{ steps.create_release.outputs.upload_url }}"
 
-      - name: Set tag version to output
-        id: set_current_tag_id
-        run: echo "::set-output name=current_tag::${{ steps.tag_version.outputs.new_tag }}"
-
-      - name: Step To run on failure
+      - name: Notify if failure
         if: ${{ failure() }}
         uses: appleboy/telegram-action@master
         with:
@@ -54,7 +99,7 @@ jobs:
   
   build:
     name: Build packages
-    needs: release
+    needs: [ prepare, release ]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -75,15 +120,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Go
+      - name: Set up Go version
         uses: actions/setup-go@v3
         with:
-          go-version: 1.16      
+          go-version: 1.16   
 
       - name: Build with for ${{ matrix.TARGET }}
         run: ${{ matrix.CMD_BUILD }}
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload Artifacts 
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.OUT_FILE_NAME }}
           path: ${{ matrix.OUT_FILE_NAME }}
@@ -100,7 +146,7 @@ jobs:
           asset_name: ${{ matrix.OUT_FILE_NAME }}
           asset_content_type: ${{ matrix.ASSET_MIME }}
 
-      - name: Step To run on failure
+      - name: Notify if failure
         if: ${{ failure() }}
         uses: appleboy/telegram-action@master
         with:
@@ -115,7 +161,7 @@ jobs:
   telegram:
     runs-on: ubuntu-latest
     name: Notification
-    needs: [ release, build ]
+    needs: [ prepare release, build ]
 
     steps:
       - name: Notify telegram message after Released
@@ -129,12 +175,12 @@ jobs:
 
             <b>WorkFlows:</b> <a href="https://github.com/${{ github.repository }}/actions">ActionsList</a>
             
-            Commit with tag: ${{ needs.release.outputs.get_current_tag }}
+            Commit with tag: ${{ needs.prepare.outputs.get_current_tag }}
             
             Repository: ${{ github.repository }}
            
             Branch: ${{ github.ref }}
             
-            <b>Release URL:</b> https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.get_current_tag }}
+            <b>Release URL:</b> https://github.com/${{ github.repository }}/releases/tag/${{ needs.prepare.outputs.get_current_tag }}
             
             See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
